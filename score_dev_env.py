@@ -31,11 +31,11 @@ def run(command, is_shell=False):
     """Runs a shell command and returns the stdout response"""
     result = subprocess.run(shlex.split(command),
                             stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
+                            #stderr=subprocess.PIPE,
                             shell=is_shell,
                             )
     result.stdout = result.stdout.decode('utf-8')
-    result.stderr = result.stderr.decode('utf-8')
+    # result.stderr = result.stderr.decode('utf-8')
     return result.stdout
 
 
@@ -48,8 +48,12 @@ def check_password(user, pw):
     return calculated_shadow_line == users[user]
 
 
+def main_user(uid):
+    return pwd.getpwuid(uid).pw_name
+
+
 def main_user_name_ish(user, uid):
-    username = pwd.getpwuid(uid).pw_name
+    username = main_user(uid)
     return user in username
 
 
@@ -126,7 +130,7 @@ def pg_database_owner(db, owner):
 
 
 def pg_user_pwhash(user):
-    sql = f"select passwd from pg_shadow where user='{user}';"
+    sql = f"select passwd from pg_shadow where usename='{user}';"
     return pg_run(sql)
 
 
@@ -134,7 +138,7 @@ def is_program_installed(program):
     return shutil.which(program) != ''
 
 
-def is_one_of_program_installed(programs):
+def is_one_of_program_installed(*programs):
     return any(map(is_program_installed, programs))
 
 
@@ -208,7 +212,7 @@ def part_exists(mountpoint):
 
 def check_partition_size(mountpoint, size):
     total_size = GiB(psutil.disk_usage(mountpoint).total)
-    return math.isclose(size, total_size, rel_tol = 0.05)
+    return math.isclose(size, total_size, rel_tol = 0.1)
 
 
 def test_3G_of_memory():
@@ -225,7 +229,10 @@ class Task:
     def __init__(self, name, function, arguments=None, expected=True, failmsg=None):
         self.name = name
         self.function = function
-        self.args = list(arguments)
+        if isinstance(arguments, list) or isinstance(arguments, tuple):
+            self.args = list(arguments)
+        else:
+            self.args = [arguments]
         self.expected = expected
         if failmsg is None:
             self.failmsg = f"Function {self.function.__name__} with arguments {self.args} was not {expected} as expected."
@@ -293,9 +300,9 @@ class TestSystemSpecifications(TestSuite):
             Task("Home Partition Exists", part_exists, "/home", failmsg="There is no separate home partition"),
             Task("Root Partition Size", check_partition_size, ["/", ROOT_SIZE_GB], failmsg="Root partition is wrong size"),
             Task("Home Partition Size", check_partition_size, ["/home", HOME_SIZE_GB], failmsg="Home partition is wrong size"),
-            Task("Root Partition Filesystem", part_fs("/"), expected="ext4", failmsg="Root partition should be ext4 filesystem"),
-            Task("Home Partition Filesystem", part_fs("/home"), expected="ext4", failmsg="Home partition should be ext4 filesystem"),
-            Task("Hostname set", gethostname, exptected="newguyscomp", failmsg="Hostname should be 'newguyscomp'"),
+            Task("Root Partition Filesystem", part_fs, "/", expected="ext4", failmsg="Root partition should be ext4 filesystem"),
+            Task("Home Partition Filesystem", part_fs, "/home", expected="ext4", failmsg="Home partition should be ext4 filesystem"),
+            Task("Hostname set", gethostname, expected="newguyscomp", failmsg="Hostname should be 'newguyscomp'"),
         ]
 
 
@@ -308,7 +315,7 @@ class TestUserSetup(TestSuite):
     def __init__(self):
         self.tasks = [
             Task("Main user has 'admin' in username", main_user_name_ish, ["admin", 1000], failmsg="Main user should be 'admin'-ish"),
-            Task("Admin password", check_password, ["admin", "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!"),
+            Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!"),
             Task("Newguy User Exists", is_user_in_passwd, "newguy", failmsg="User 'newguy' doesn't exist"),
             Task("Newguy password", check_password, ["newguy", "newguy#5%"], failmsg="Newguy's password should be 'newguy#5%"),
             Task("Newguy's sudo commands", get_user_sudo_perms, "newguy", SUDO_COMMANDS, failmsg="Newguy's sudo commands incorrect"),
@@ -347,7 +354,7 @@ class TestPostgresSetup(TestSuite):
             Task("Database user newguydb exists", pg_user_exists, "newguydb", failmsg="Postgres should have a user named newguydb"),
             Task("Database user has correct password", pg_user_pwhash, PG_PASSWD_HASH, failmsg="Postgres user newguydb should have password 'postgresRulez!"),
             Task("Database widget_test exists", pg_database_exists, "widget_test", failmsg="Postgres database 'widget_test' should be created"),
-            Task("Database owner correct", pg_database_owner, "widget_test", "newguydb", failmsg="Postgres database 'widget_test' should be owned by 'newguydb'"),
+            Task("Database owner correct", pg_database_owner, ["widget_test", "newguydb"], failmsg="Postgres database 'widget_test' should be owned by 'newguydb'"),
         ]
 
 
