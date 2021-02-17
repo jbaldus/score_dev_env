@@ -212,7 +212,7 @@ def part_exists(mountpoint):
 
 def check_partition_size(mountpoint, size):
     total_size = GiB(psutil.disk_usage(mountpoint).total)
-    return math.isclose(size, total_size, rel_tol = 0.1)
+    return math.isclose(size, total_size, rel_tol = 0.1) or (math.isclose(size, total_size, rel_tol = 0.2) and total_size > size)
 
 
 def test_3G_of_memory():
