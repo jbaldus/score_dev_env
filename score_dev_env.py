@@ -76,7 +76,7 @@ def pg_run(sql):
 
 
 def pg_user_exists(user):
-    sql = f"select username from pg_user where username='{user}';"
+    sql = f"select usename from pg_user where usename='{user}';"
     result = pg_run(sql)
     return result.strip() != ""
 
