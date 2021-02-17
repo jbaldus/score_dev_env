@@ -36,7 +36,7 @@ def run(command, is_shell=False):
                             )
     result.stdout = result.stdout.decode('utf-8')
     result.stderr = result.stderr.decode('utf-8')
-    return result.stdout
+    return result.stdout.strip()
 
 
 def check_password(user, pw):
@@ -175,9 +175,9 @@ def is_ufw_enabled():
 
 
 def is_cron_job_set(search_text, frequency = "daily"):
-    grep = run(f"grep -Rl '{search_text}' /etc/cron.{frequency}")
+    grep = run(f"grep -Rl '{search_text}' /etc/cron.{frequency}").strip()
     executable = os.access(grep, os.X_OK)
-    return grep.strip() != "" and executable
+    return grep != "" and executable
 
 
 def is_daily_update_checked():
@@ -338,7 +338,7 @@ class TestSoftwareInstallations(TestSuite):
                 Task(f"Program {prog} installed", is_program_installed, prog, failmsg=f"Program {prog} should be installed")
             )
         self.tasks.append(
-            Task("Cron job set to scan home", is_cron_job_set, "clam", failmsg="Cron job should be set to scan home directory every day")
+            Task("Cron job set to scan home", is_cron_job_set, "clamscan", failmsg="Cron job should be set to scan home directory every day")
         )
 
 
