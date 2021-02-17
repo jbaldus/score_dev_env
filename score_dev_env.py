@@ -59,7 +59,7 @@ def main_user_name_ish(user, uid):
 
 def get_user_sudo_perms(user):
     sudo_line = run(f"sudo -l -U {user}").splitlines()[-1]
-    commands = re.search(r'\(.*?\) (NOPASSWD: )?(.*)', sudo_line).group(1)
+    commands = re.search(r'\(.*?\) (?:NOPASSWD: )?(.*)', sudo_line).group(1)
     return set(commands.split(','))
 
 
