@@ -76,6 +76,12 @@ def pg_run(sql):
     return run(f'sudo -u postgres psql -t -c "{sql}"')
 
 
+def pg_user_exists(user):
+    sql = f"select username from pg_user where username='{user}';"
+    result = pg_run(sql)
+    return result.strip() != ""
+
+
 def pg_database_exists(db):
     sql = f"select datname from pg_database where datname='{db}';"
     result = pg_run(sql)
@@ -133,9 +139,26 @@ def is_one_of_program_installed(programs):
     return any(map(is_program_installed, programs))
 
 
+def is_service_running(service):
+    active_line = run(f"systemctl is-active {service}")
+    is_active = "inactive" not in active_line
+    return is_active
+
+
+def is_service_enabled(service):
+    enabled_line = run(f"systemctl is-enabled {service}")
+    is_enabled = "disabled" not in enabled_line
+    return is_enabled
+
+
+def is_service_removed(service):
+    return not is_service_running(service) and not is_service_enabled(service)
+
+
 def is_cron_job_set(search_text, frequency = "daily"):
     grep = run(f"grep -R '{search_text}' /etc/cron.{frequency}")
     return grep.strip() != ""
+
 
 def is_daily_update_checked():
     update_package_list = run("grep 'APT::Periodic::Update-Package_Lists' /etc/apt/apt.conf.d/*")
@@ -192,6 +215,7 @@ class Task:
             self.failmsg = f"Function {self.function.__name__} with arguments {self.args} was not {expected} as expected."
         else:
             self.failmsg = failmsg
+        self.print_if_failed = True
 
 
     def check(self):
@@ -206,9 +230,8 @@ class Task:
         result = self.check()
         icon = "\N{heavy check mark}" if result else "\N{heavy ballot x}"
         msg = "" if result else self.failmsg
-        line = f"{name: <35}  [{icon}]  {msg}"
-        print(line)
-        return result
+        line = f"[{icon}]  {name: <35}   {msg}"
+        return result, line
 
 
 class TestSuite:
@@ -216,13 +239,24 @@ class TestSuite:
         self.tasks = []
         self.results = []
 
+    
+    def _is_secret(self):
+        tasks_hidden = [not x.print_if_failed for x in self.tasks]
+        return all(tasks_hidden)
+
     def report(self):
-        print(self.__doc__)
-        self.results = []
+        results = []
         for task in self.tasks:
-            result = task.report()
-            self.results.append(result)
-        return self.results
+            result, report = task.report()
+            results.append( (task.print_if_failed, result, report) )
+        
+        if not self._is_secret() or any([x[1] for x in results]):
+            print(self.__doc__)
+            for pif, result, report in results:
+                if not result and not pif:
+                    continue
+                print(report)
+        return [x[1] for x in results]
 
 
 class TestSystemSpecification(TestSuite):
@@ -280,29 +314,36 @@ class TestSoftwareInstallations(TestSuite):
         )
 
 
-
-
-class TestServices(object):
+class TestPostgresSetup(TestSuite):
     """
     =================================================
-    =                   SERVICES                    = 
+    =             SOFTWARE INSTALLATION             = 
     =================================================
     """
-
-    def service_is_running(self, service):
-        active_line = run(f"systemctl is-active {service}")
-        is_active = "inactive" not in active_line
-        return is_active
-
-
-    def service_is_enabled(self, service):
-        enabled_line = run(f"systemctl is-enabled {service}")
-        is_enabled = "disabled" not in enabled_line
-        return is_enabled
+    def __init__(self):
+        self.tasks = [
+            Task("Postgres service should be running", is_service_running, "postgres", failmsg="Postgres server not running"),
+            Task("Database user newguydb exists", pg_user_exists, "newguydb", failmsg="Postgres should have a user named newguydb"),
+            Task("Database user has correct password", pg_user_pwhash, PG_PASSWD_HASH, failmsg="Postgres user newguydb should have password 'postgresRulez!"),
+            Task("Database widget_test exists", pg_database_exists, "widget_test", failmsg="Postgres database 'widget_test' should be created"),
+            Task("Database owner correct", pg_database_owner, "widget_test", "newguydb", failmsg="Postgres database 'widget_test' should be owned by 'newguydb'"),
+        ]
 
 
-    def service_is_removed(self, service):
-        return not self.is_service_running(service) and not self.is_service_enabled(service)
+
+class TestBonusPoints(TestSuite):
+    """
+    =================================================
+    =                 BONUS POINTS                  = 
+    =================================================
+    """
+    def __init__(self):
+        self.tasks = [
+            Task("Firewall Enabled", is_ufw_enabled, failmsg="Firewall not enabled"),
+            Task("Check for updates daily", is_daily_update_checked, failmsg="Should automatically check for updates every day"),
+            Task("Auto-upgrade", is_auto_upgrade, failmsg="Should automatically upgrade")
+        ]
+
 
 
 
