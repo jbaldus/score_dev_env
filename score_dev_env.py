@@ -12,7 +12,6 @@ import re
 import glob
 from multiprocessing import cpu_count
 import psutil
-import pytest
 from socket import gethostname
 
 
@@ -235,14 +234,15 @@ class Task:
 
 
 class TestSuite:
-    def __init__(self):
-        self.tasks = []
+    def __init__(self, tasks=None):
+        self.tasks = tasks if tasks is not None else []
         self.results = []
 
     
     def _is_secret(self):
         tasks_hidden = [not x.print_if_failed for x in self.tasks]
         return all(tasks_hidden)
+
 
     def report(self):
         results = []
@@ -256,6 +256,9 @@ class TestSuite:
                 if not result and not pif:
                     continue
                 print(report)
+            successes = [x[1] for x in results].count(True)
+            summary_line = f"{successes} Successful out of {len(results)}"
+            print(summary_line)
         return [x[1] for x in results]
 
 
@@ -330,7 +333,6 @@ class TestPostgresSetup(TestSuite):
         ]
 
 
-
 class TestBonusPoints(TestSuite):
     """
     =================================================
@@ -365,3 +367,14 @@ if __name__ == "__main__":
     PG_PASSWD_HASH = 'md51efb824c86d1810d4dc8cec3d54148a2'
     SUDO_COMMANDS = set('/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl start openvpn')
     NODE_VERSION = 14
+
+    tests = [
+        TestSystemSpecifications(),
+        TestUserSetup(),
+        TestSoftwareInstallation(),
+        TestPostgresSetup(),
+        TestBonusPoints(),
+    ]
+
+    for test in tests:
+        test.report()
