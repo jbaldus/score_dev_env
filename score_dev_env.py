@@ -131,7 +131,7 @@ def pg_database_owner(db, owner):
 
 def pg_user_pwhash(user):
     sql = f"select passwd from pg_shadow where usename='{user}';"
-    return pg_run(sql)
+    return pg_run(sql).strip()
 
 
 def is_program_installed(program):
