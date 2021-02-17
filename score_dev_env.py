@@ -94,7 +94,7 @@ def is_user_in_admin(user):
 def get_partition_size_bytes(partition):
     if "/dev/sd" in partition:
         partitions = psutil.disk_partitions(all=True)
-        part_info = next((x for x in partitions if x.device = partition), None)
+        part_info = next((x for x in partitions if x.device == partition), None)
         if part_info is None:
             raise KeyError(f"Partition {partition} is not mounted.")
         mountpoint = part_info.mountpoint
@@ -162,6 +162,12 @@ def is_service_enabled(service):
 
 def is_service_removed(service):
     return not is_service_running(service) and not is_service_enabled(service)
+
+
+def is_ufw_enabled():
+    enabled_line = run("ufw status")
+    is_enabled = "inactive" not in enabled_line
+    return is_enabled
 
 
 def is_cron_job_set(search_text, frequency = "daily"):
@@ -240,7 +246,7 @@ class Task:
         result = self.check()
         icon = "\N{heavy check mark}" if result else "\N{heavy ballot x}"
         msg = "" if result else self.failmsg
-        line = f"[{icon}]  {name: <35}   {msg}"
+        line = f"[{icon}]  {self.name: <35}   {msg}"
         return result, line
 
 
@@ -273,7 +279,7 @@ class TestSuite:
         return [x[1] for x in results]
 
 
-class TestSystemSpecification(TestSuite):
+class TestSystemSpecifications(TestSuite):
     """
     ================================================
     =               VM SPECIFICATION               =
@@ -317,7 +323,7 @@ class TestSoftwareInstallations(TestSuite):
     """
     def __init__(self):
         self.tasks = [
-            Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded)
+            Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded"),
             Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
         ]
         for prog in ['git', 'vim', 'bpython', 'nodejs', 'code']:
@@ -355,7 +361,7 @@ class TestBonusPoints(TestSuite):
         self.tasks = [
             Task("Firewall Enabled", is_ufw_enabled, failmsg="Firewall not enabled"),
             Task("Check for updates daily", is_daily_update_checked, failmsg="Should automatically check for updates every day"),
-            Task("Auto-upgrade", is_auto_upgrade, failmsg="Should automatically upgrade")
+            Task("Auto-upgrade", is_auto_upgrade_enabled, failmsg="Should automatically upgrade")
         ]
 
 
@@ -383,7 +389,7 @@ if __name__ == "__main__":
     tests = [
         TestSystemSpecifications(),
         TestUserSetup(),
-        TestSoftwareInstallation(),
+        TestSoftwareInstallations(),
         TestPostgresSetup(),
         TestBonusPoints(),
     ]
