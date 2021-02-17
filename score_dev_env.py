@@ -138,9 +138,14 @@ def is_one_of_program_installed(programs):
     return any(map(is_program_installed, programs))
 
 
-def is_program_upgradable(program):
+def is_program_uptodate(program):
     result = run(f"apt list {program}")
-    return "upgradable" in result
+    return not "upgradable" in result
+
+
+def is_software_uptodate():
+    result = run("apt list --upgradable")
+    return result.strip() != ""
 
 
 def is_service_running(service):
@@ -312,7 +317,8 @@ class TestSoftwareInstallations(TestSuite):
     """
     def __init__(self):
         self.tasks = [
-            Task(f"Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
+            Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded)
+            Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
         ]
         for prog in ['git', 'vim', 'bpython', 'nodejs', 'code']:
             self.tasks.append(
