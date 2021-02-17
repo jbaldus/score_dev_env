@@ -59,6 +59,38 @@ def get_user_sudo_perms(user):
     return set(commands.split(','))
 
 
+def is_user_in_passwd(user):
+    pass_line = run(f"grep {user} /etc/passwd")
+    return pass_line.strip != ''
+
+
+def is_user_home_removed(user):
+    try:
+        return not os.path.isdir(f"/home/{user}")
+    except:
+        return True
+
+
+def is_user_removed(user):
+    return is_user_home_removed(user) and not is_user_in_passwd(user)
+
+
+def is_root_login_disabled():
+    root_line = run("grep ^root /etc/shadow")
+    pass_hash = root_line.split(':')[1]
+    return '!' in pass_hash
+
+
+def is_root_ssh_login_disabled():
+    permit_root_login = run("grep ^PermitRootLogin /etc/ssh/sshd_config")
+    is_yes = "yes" in permit_root_login
+    return not is_yes
+
+
+def is_user_in_admin(user):
+    return 'sudo' in run(f"groups {user}")
+
+
 def get_partition_size_bytes(partition):
     if "/dev/sd" in partition:
         partitions = psutil.disk_partitions(all=True)
@@ -98,44 +130,17 @@ def pg_user_pwhash(user):
     return pg_run(sql)
 
 
-def is_user_in_passwd(user):
-    pass_line = run(f"grep {user} /etc/passwd")
-    return pass_line.strip != ''
-
-
-def is_user_home_removed(user):
-    try:
-        return not os.path.isdir(f"/home/{user}")
-    except:
-        return True
-
-
-def is_user_removed(user):
-    return is_user_home_removed(user) and not is_user_in_passwd(user)
-
-
-def is_root_login_disabled():
-    root_line = run("grep ^root /etc/shadow")
-    pass_hash = root_line.split(':')[1]
-    return '!' in pass_hash
-
-
-def is_root_ssh_login_disabled():
-    permit_root_login = run("grep ^PermitRootLogin /etc/ssh/sshd_config")
-    is_yes = "yes" in permit_root_login
-    return not is_yes
-
-
-def is_user_in_admin(user):
-    return 'sudo' in run(f"groups {user}")
-
-
 def is_program_installed(program):
     return shutil.which(program) != ''
 
 
 def is_one_of_program_installed(programs):
     return any(map(is_program_installed, programs))
+
+
+def is_program_upgradable(program):
+    result = run(f"apt list {program}")
+    return "upgradable" in result
 
 
 def is_service_running(service):
