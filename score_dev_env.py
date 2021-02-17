@@ -383,7 +383,7 @@ if __name__ == "__main__":
     HOME_SIZE_GB = 5
     ROOT_SIZE_GB = 20
     PG_PASSWD_HASH = 'md51efb824c86d1810d4dc8cec3d54148a2'
-    SUDO_COMMANDS = set('/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl start openvpn')
+    SUDO_COMMANDS = set(['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl start openvpn'])
     NODE_VERSION = 14
 
     tests = [
