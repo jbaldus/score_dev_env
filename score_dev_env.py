@@ -31,11 +31,11 @@ def run(command, is_shell=False):
     """Runs a shell command and returns the stdout response"""
     result = subprocess.run(shlex.split(command),
                             stdout=subprocess.PIPE,
-                            #stderr=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
                             shell=is_shell,
                             )
     result.stdout = result.stdout.decode('utf-8')
-    # result.stderr = result.stderr.decode('utf-8')
+    result.stderr = result.stderr.decode('utf-8')
     return result.stdout
 
 
