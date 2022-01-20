@@ -30,6 +30,10 @@ Anytime you want to get your score with a breakdown of the tasks you have done a
 sudo python3 ~/score/score.py
 ```
 
+and you should be met with a screen that looks like this:
+
+![Overview](https://github.com/jbaldus/score_dev_env/raw/main/imgs/overview.png)
+
 # Caveats
 As awesome as this little scoring script is, there are a few things to be aware of:
 
