@@ -428,7 +428,7 @@ def TestSoftwareInstallations():
         Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded"),
         Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
     ]
-    for prog in ['git', 'vim', 'bpython', 'nodejs', 'code']:
+    for prog in ['git', 'vim', 'bpython', 'nodejs', 'code', 'google-chrome']:
         tasks.append(
             Task(f"Program {prog} installed", is_program_installed, prog, failmsg=f"Program {prog} should be installed")
         )
