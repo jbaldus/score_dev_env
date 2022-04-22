@@ -428,9 +428,11 @@ def TestSoftwareInstallations():
         Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded"),
         Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
     ]
-    for prog in ['git', 'vim', 'bpython', 'nodejs', 'code', 'google-chrome']:
+    
+    programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'nodejs', 'Visual Studio Code': 'code', 'Google Chrome': 'google-chrome'}
+    for prog, command in items(programs_to_install):
         tasks.append(
-            Task(f"Program {prog} installed", is_program_installed, prog, failmsg=f"Program {prog} should be installed")
+            Task(f"Program {prog} installed", is_program_installed, command, failmsg=f"Program {prog} should be installed")
         )
     tasks.append(
         Task("Cron job set to scan home", is_cron_job_set, "clamscan", failmsg="Cron job should be set to scan home directory every day")
