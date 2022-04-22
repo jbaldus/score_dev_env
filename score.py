@@ -435,7 +435,7 @@ def TestSoftwareInstallations():
             Task(f"Program {prog} installed", is_program_installed, command, failmsg=f"Program {prog} should be installed")
         )
     tasks.append(
-        Task("Cron job set to scan home", is_cron_job_set, "clamscan", failmsg="Cron job should be set to scan home directory every day")
+        Task("Cron job to run updatedb", is_cron_job_set, "updatedb", failmsg="Cron job should be set to run updatedb every day")
     )
     return TestSuite(
     """
