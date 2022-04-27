@@ -430,7 +430,7 @@ def TestSoftwareInstallations():
     ]
     
     programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'nodejs', 'Visual Studio Code': 'code', 'Google Chrome': 'google-chrome'}
-    for prog, command in items(programs_to_install):
+    for prog, command in programs_to_install.items():
         tasks.append(
             Task(f"Program {prog} installed", is_program_installed, command, failmsg=f"Program {prog} should be installed")
         )
