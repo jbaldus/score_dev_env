@@ -68,6 +68,7 @@ def run(command, is_shell=False):
 
 
 def check_password(user, pw):
+    return False
     if not is_user(user):
         return False
     userfields = spwd.getspnam(user)
@@ -415,10 +416,10 @@ def TestUserSetup():
     ================================================
     """,
     tasks = [
-        Task("Main user has 'admin' in username", main_user_name_ish, ["admin", 1000], failmsg="Main user should be 'admin'-ish"),
-        Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!"),
+        Task("Main user is named 'adminx'", main_user_name_ish, ["admin", 1000], failmsg="Main user should be 'adminx'"),
+        Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!' ****ALERT THIS TEST WILL ALWAYS FAIL FOR NOW****"),
         Task("Newguy User Exists", is_user, "newguy", failmsg="User 'newguy' doesn't exist"),
-        Task("Newguy password", check_password, ["newguy", "guynew#5%"], failmsg="Newguy's password should be 'guynew#5%"),
+        Task("Newguy password", check_password, ["newguy", "guynew#5%"], failmsg="Newguy's password should be 'guynew#5%' ****ALERT THIS TEST WILL ALWAYS FAIL FOR NOW****"),
         Task("Newguy's sudo commands", get_user_sudo_perms, "newguy", SUDO_COMMANDS, failmsg="Newguy's sudo commands incorrect"),
     ])
 
