@@ -491,7 +491,7 @@ def TestPostgresSetup():
     tasks = [
         Task("Postgres service should be running", is_service_running, "postgresql", failmsg="Postgres server not running"),
         Task("Database user newguydb exists", pg_user_exists, "newguydb", failmsg="Postgres should have a user named newguydb"),
-        Task("Database user has correct password", pg_user_password, ["newguydb", PG_PASSWD_HASH], True, failmsg="Postgres user newguydb should have password 'postgresRulez!"),
+        Task("Database user has correct password", pg_user_password, ["newguydb", "postgresRulez!"], failmsg="Postgres user newguydb should have password 'postgresRulez!"),
         Task("Database widget_test exists", pg_database_exists, "widget_test", failmsg="Postgres database 'widget_test' should be created"),
         Task("Database owner correct", pg_database_owner, ["widget_test", "newguydb"], failmsg="Postgres database 'widget_test' should be owned by 'newguydb'"),
     ])
