@@ -41,7 +41,7 @@ try:
     from rich.table import Table
     from rich.panel import Panel
     from rich.text import Text
-    from rich.console import Console, RenderGroup, RenderResult
+    from rich.console import Console, Group, RenderResult
 
     use_rich = True
 
@@ -381,7 +381,7 @@ class TestSuite:
                 title = Text(self.name, justify='center')
             success_num = successes.count(True)
             summary_line = Text(f"{success_num} Successful out of {len(results)}", justify='right')
-            panel_text = RenderGroup(title, table, '', summary_line)
+            panel_text = Group(title, table, '', summary_line)
             border_style = "green" if all(successes) else "red"
             panel = Panel(panel_text, highlight=True, border_style=border_style, width=100)
             print(panel)
