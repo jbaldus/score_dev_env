@@ -1,22 +1,19 @@
 #!/usr/bin/python3
 
-import crypt
 import subprocess
 import shlex
 import shutil
-import datetime
 import os
 import pwd
-import spwd
 import math
 import re 
-import glob
 from multiprocessing import cpu_count
 from socket import gethostname
 
 
 try:
     import psutil
+    import simplepam
 except ImportError:
     help_msg = """
 This program requires a couple of Python packages to be installed using pip. 
@@ -68,13 +65,7 @@ def run(command, is_shell=False):
 
 
 def check_password(user, pw):
-    return False
-    if not is_user(user):
-        return False
-    userfields = spwd.getspnam(user)
-    _, alg, salt, hash = userfields.sp_pwdp.split('$')
-    calculated_shadow_line = crypt.crypt(pw, f"${alg}${salt}$")
-    return calculated_shadow_line == userfields.sp_pwdp
+    return simplepam.authenticate(user, pw)
 
 
 def main_user(uid):
