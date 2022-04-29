@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import base64
 import subprocess
 import shlex
 import shutil
@@ -15,6 +16,7 @@ from socket import gethostname
 try:
     import psutil
     import simplepam
+    import scramp
 except ImportError:
     help_msg = """
 This program requires a couple of Python packages to be installed using pip. 
@@ -160,6 +162,21 @@ def pg_database_owner(db, owner):
 def pg_user_pwhash(user):
     sql = f"select passwd from pg_shadow where usename='{user}';"
     return pg_run(sql).strip()
+
+def pg_user_password(user, password):
+    pwhash = pg_user_pwhash(user)
+    mechanism = pwhash.split('$')[0]
+    if 'SCRAM' not in mechanism:
+        return pwhash == password
+    rounds, salt = pwhash.split('$')[1].split(':')
+    rounds = int(rounds)
+    salt = base64.b64decode(salt)
+    mechanism = scramp.ScramMechanism()
+    computed = mechanism.make_auth_info(password, rounds, salt)
+    computed_stored_key = base64.b64encode(computed[1]).decode('utf-8')
+    computed_server_key = base64.b64encode(computed[2]).decode('utf-8')
+    return pwhash.split('$')[2] == f"{computed_stored_key}:{computed_server_key}"
+
 
 
 def is_program_installed(program):
@@ -474,7 +491,7 @@ def TestPostgresSetup():
     tasks = [
         Task("Postgres service should be running", is_service_running, "postgresql", failmsg="Postgres server not running"),
         Task("Database user newguydb exists", pg_user_exists, "newguydb", failmsg="Postgres should have a user named newguydb"),
-        Task("Database user has correct password", pg_user_pwhash, "newguydb", PG_PASSWD_HASH, failmsg="Postgres user newguydb should have password 'postgresRulez!"),
+        Task("Database user has correct password", pg_user_password, ["newguydb", PG_PASSWD_HASH], True, failmsg="Postgres user newguydb should have password 'postgresRulez!"),
         Task("Database widget_test exists", pg_database_exists, "widget_test", failmsg="Postgres database 'widget_test' should be created"),
         Task("Database owner correct", pg_database_owner, ["widget_test", "newguydb"], failmsg="Postgres database 'widget_test' should be owned by 'newguydb'"),
     ])
