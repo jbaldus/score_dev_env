@@ -1,4 +1,4 @@
-psutil = 5.9.0
-rich = 12.3.0
-simplepam = 0.1.5
-scramp = 1.4.1
+psutil == 5.9.0
+rich == 12.3.0
+simplepam == 0.1.5
+scramp == 1.4.1
