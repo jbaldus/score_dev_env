@@ -350,7 +350,7 @@ class TestSuite:
         
         if not self._is_secret() or any(successes):
             print(self.__doc__)
-            for pif, result, report in results:
+            for result, report, pif in results:
                 if not result and not pif:
                     continue
                 print(report)
