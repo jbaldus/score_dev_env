@@ -4,6 +4,7 @@ import subprocess
 import shlex
 import shutil
 import os
+from pathlib import Path
 import pwd
 import math
 import re 
@@ -231,7 +232,16 @@ def is_ufw_enabled():
     return is_enabled
 
 
-def is_cron_job_set(search_text, frequency = "daily"):
+def is_cron_job_set(command, frequency = "daily"):
+    crondir = Path(f"/etc/cron.{frequency}")
+    cronlinks = [f for f in crondir.iterdir() if f.is_file() and f.is_symlink() ]
+    for link in cronlinks:
+        if os.readlink(link) == shutil.which(command):
+            return True
+    cron_job_search_text(command, frequency)
+
+
+def cron_job_search_text(search_text, frequency = "daily"):
     grep = run(f"grep -Rl '{search_text}' /etc/cron.{frequency}").strip()
     executable = os.access(grep, os.X_OK)
     if grep != "" and executable:
@@ -424,9 +434,9 @@ def TestUserSetup():
     """,
     tasks = [
         Task("Main user is named 'adminx'", main_user_name_ish, ["admin", 1000], failmsg="Main user should be 'adminx'"),
-        Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!' ****ALERT THIS TEST WILL ALWAYS FAIL FOR NOW****"),
+        Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!'"),
         Task("Newguy User Exists", is_user, "newguy", failmsg="User 'newguy' doesn't exist"),
-        Task("Newguy password", check_password, ["newguy", "guynew#5%"], failmsg="Newguy's password should be 'guynew#5%' ****ALERT THIS TEST WILL ALWAYS FAIL FOR NOW****"),
+        Task("Newguy password", check_password, ["newguy", "guynew#5%"], failmsg="Newguy's password should be 'guynew#5%'"),
         Task("Newguy's sudo commands", get_user_sudo_perms, "newguy", SUDO_COMMANDS, failmsg="Newguy's sudo commands incorrect"),
     ])
 
