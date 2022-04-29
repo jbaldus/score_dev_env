@@ -171,13 +171,16 @@ def pg_user_pwhash(user):
 
 
 def is_program_installed(program):
-    return shutil.which(program) != ''
+    return shutil.which(program) is not None
 
 def which(command):
     split_command = shlex.split(command)
     cmd = split_command[0]
+    resolved_cmd = shutil.which(cmd)
+    if resolved_cmd is None:
+        return None
     args = " ".join(split_command[1:])
-    return f"{shutil.which(cmd)} {args}"
+    return f"{resolved_cmd} {args}"
 
 
 def is_one_of_program_installed(*programs):
@@ -191,18 +194,25 @@ def is_program_uptodate(program):
     elif is_program_installed("pacman"):
         result = run(f"pacman -Qu {program}")
         return result == ""
+    elif is_program_installed("yum"):
+        result = run(f"yum check-update {program}")
+        return not program in result
     else:
-        raise NotImplementedError("Scoring can only run on systems with apt or pacman")
+        raise NotImplementedError("Scoring can only run on systems with apt or pacman or yum")
 
 
 def is_software_uptodate():
     if is_program_installed("apt"):
         result = run("apt list --upgradable")
+        return result.strip() != ""
     elif is_program_installed("pacman"):
         result = run("pacman -Qu")
+        return result.strip() != ""
+    elif is_program_installed("yum"):
+        result = run("yum check-update")
+        return len(result.split("\n")) == 1
     else:
         raise NotImplementedError("Scoring can only run on systems with apt or pacman")
-    return result.strip() != ""
 
 
 def is_service_running(service):
@@ -223,6 +233,8 @@ def is_service_removed(service):
 
 def is_ufw_enabled():
     # Only for Ubuntu-ish distros
+    if not is_program_installed("ufw"):
+        return False
     enabled_line = run("ufw status")
     is_enabled = "inactive" not in enabled_line
     return is_enabled
@@ -238,12 +250,16 @@ def is_cron_job_set(search_text, frequency = "daily"):
 
 
 def is_daily_update_checked():
+    if not is_program_installed("apt"):
+        return False
     # Only works for Debian-based distros
     update_package_list = run("grep 'APT::Periodic::Update-Package_Lists' /etc/apt/apt.conf.d/*")
     return '1' in update_package_list
 
 
 def is_auto_upgrade_enabled():
+    if not is_program_installed("apt"):
+        return False
     # Only works for Debian-based distros
     unattended_upgrade = run("grep 'APT::Periodic::Unattended-Upgrade' /etc/apt/apt.conf.d/*")
     return '1' in unattended_upgrade
