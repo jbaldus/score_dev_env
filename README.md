@@ -56,3 +56,12 @@ sudo apt update
 ```
 
 and then retry the installation command.
+
+### That didn't fix it
+You might be running into an error that has been fixed since you originally downloaded the program. You can try updating the scoring program by running
+
+```sh
+git pull
+```
+
+in the directory where you downloaded this program. Then try whatever you were trying to do when you got an error.
