@@ -255,7 +255,7 @@ def is_cron_job_set(command, frequency = "daily"):
     for link in cronlinks:
         if os.readlink(link) == shutil.which(command):
             return True
-    cron_job_search_text(command, frequency)
+    return cron_job_search_text(command, frequency)
 
 
 def cron_job_search_text(search_text, frequency = "daily"):
