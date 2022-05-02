@@ -38,7 +38,7 @@ and you should be met with a screen that looks like this:
 As awesome as this little scoring script is, there are a few things to be aware of:
 
 * Even though the Development Environment Project says students can install non-Debian-based distros, like Fedora or Manjaro, this scoring script will only fully work on Debian-based distributions. It has been tested most on Ubuntu.
-* False Positives: It doesn't exactly check **everything**. For example, it only just checks to see if `clamscan` is in a script file in `/etc/cron.daily` or _anywhere_ in the `/etc/crontab` file.
+* False Positives: It doesn't exactly check **everything**. For example, it only just checks to see if `updatedb` is in a script file in `/etc/cron.daily` or _anywhere_ in the `/etc/crontab` file.
 * False Negatives: It might not correctly check some thing or another thing. It might not check _all_ the ways a requirement might be satisfied.
 * Bonus Points: There are a couple of checks that will appear for a few bonus tasks. Technically speaking, achieving these bonus tasks would be a case of **NOT** satisfying the requirements of the project.
 
