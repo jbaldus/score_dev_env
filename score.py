@@ -266,7 +266,7 @@ def cron_job_search_text(search_text, frequency = "daily"):
     grep = run(f"grep {search_text} /etc/crontab")
     if grep != "":
         return True
-    grep = run(f"grep {search_text} /var/spool/cron/crontabs/*")
+    grep = run(f"grep -R {search_text} /var/spool/cron/crontabs/")
     return grep != ""
 
 
