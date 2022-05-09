@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import base64
+import hashlib
 import subprocess
 import shlex
 import shutil
@@ -163,7 +164,12 @@ def pg_user_pwhash(user):
     sql = f"select passwd from pg_shadow where usename='{user}';"
     return pg_run(sql).strip()
 
+
 def pg_user_password(user, password):
+    return new_pg_user_password(user, password) or old_pg_user_password(user, password)
+
+
+def new_pg_user_password(user, password):
     pwhash = pg_user_pwhash(user)
     mechanism = pwhash.split('$')[0]
     if 'SCRAM' not in mechanism:
@@ -177,6 +183,11 @@ def pg_user_password(user, password):
     computed_server_key = base64.b64encode(computed[2]).decode('utf-8')
     return pwhash.split('$')[2] == f"{computed_stored_key}:{computed_server_key}"
 
+
+def old_pg_user_password(user, password):
+    pwhash = pg_user_pwhash(user)
+    calculated_hash = hashlib.md5(f"{password}{user}".encode('utf-8')).hexdigest()
+    return pwhash == calculated_hash
 
 
 def is_program_installed(program):
