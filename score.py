@@ -187,7 +187,7 @@ def new_pg_user_password(user, password):
 def old_pg_user_password(user, password):
     pwhash = pg_user_pwhash(user)
     calculated_hash = hashlib.md5(f"{password}{user}".encode('utf-8')).hexdigest()
-    return pwhash == calculated_hash
+    return pwhash == "md5" + calculated_hash
 
 
 def is_program_installed(program):
