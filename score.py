@@ -118,10 +118,12 @@ def is_user_home_existing(user):
         return False
 
 
-def is_root_login_disabled():
-    root_line = run("grep ^root /etc/shadow")
-    pass_hash = root_line.split(':')[1]
-    return '!' in pass_hash
+def is_login_disabled(user = 'root'):
+    if not is_user(user):
+        return False
+    status_line = run(f"sudo passwd -S {user}")
+    password_status = status_line.split(' ')[1]
+    return password_status == "L"
 
 
 def is_root_ssh_login_disabled():
