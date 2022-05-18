@@ -120,7 +120,7 @@ def is_user_home_existing(user):
 
 def is_login_disabled(user = 'root'):
     if not is_user(user):
-        return False
+        return True
     status_line = run(f"sudo passwd -S {user}")
     password_status = status_line.split(' ')[1]
     return password_status == "L"
@@ -203,7 +203,7 @@ def old_pg_user_password(user, password):
 def is_program_installed(program):
     return shutil.which(program) is not None
 
-def which(command):
+def resolve_command(command):
     split_command = shlex.split(command)
     cmd = split_command[0]
     resolved_cmd = shutil.which(cmd)
@@ -542,7 +542,7 @@ PROCESSORS = 2
 HOME_SIZE_GB = 5
 ROOT_SIZE_GB = 20
 PG_PASSWD_HASH = 'md51efb824c86d1810d4dc8cec3d54148a2'
-SUDO_COMMANDS = set(map(which,['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql']))
+SUDO_COMMANDS = set(map(resolve_command,['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql']))
 NODE_VERSION = 14
 
 
