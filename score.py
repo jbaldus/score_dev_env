@@ -94,12 +94,20 @@ def is_user(user):
 def get_user_sudo_perms(user):
     if not is_user(user):
         return set()
-    sudo_line = run(f"sudo -l -U {user}").splitlines()[-1]
-    commands = re.search(r'\(.*?\) (?:NOPASSWD: )?(.*)', sudo_line)
-    if not commands:
-        return set()
-    commands = commands.group(1)
-    return set(map(lambda x: x.strip(), commands.split(',')))
+    commands = set()
+    sudo_response = run(f"sudo -ll -U {user}").splitlines()
+    in_commands = False
+    for line in sudo_response:
+        if line.strip() == "Commands:":
+            in_commands = True
+            continue
+        if in_commands:
+            if line.strip() == line:
+                in_commands = False
+                continue
+            else:
+                commands.add(line.strip())
+    return commands
 
 
 def is_user_home_existing(user):
