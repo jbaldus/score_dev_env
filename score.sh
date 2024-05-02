@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 DIR=/tmp/score
 
 error_cleanup () {
@@ -25,4 +24,4 @@ fi
 source $DIR/venv/bin/activate
 wget "$GH/score.py" -O $DIR/score.py > /dev/null 2>&1
 python $DIR/score.py
-popd
+popd 2>/dev/null
