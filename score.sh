@@ -12,5 +12,5 @@ if [[ ! -e venv ]]; then
     pip install -r $DIR/requirements.txt
 fi
 source $DIR/venv/bin/activate
-wget "$GH/score.py" > /dev/null 2>&1
+wget "$GH/score.py" -O $DIR/score.py > /dev/null 2>&1
 python $DIR/score.py
