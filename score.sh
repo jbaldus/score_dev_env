@@ -14,7 +14,7 @@ if [[ ! -e $DIR ]]; then
 fi
 GH="https://raw.githubusercontent.com/jbaldus/score_dev_env/main"
 
-pushd $DIR 2>/dev/null
+pushd $DIR >/dev/null
 if [[ ! -e venv ]]; then
     python3 -m venv venv
     wget "$GH/requirements.txt" > /dev/null 2>&1
@@ -24,4 +24,4 @@ fi
 source $DIR/venv/bin/activate
 wget "$GH/score.py" -O $DIR/score.py > /dev/null 2>&1
 python $DIR/score.py
-popd 2>/dev/null
+popd >/dev/null
