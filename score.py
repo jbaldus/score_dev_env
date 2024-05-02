@@ -69,7 +69,7 @@ def run(command, is_shell=False):
 
 
 def check_password(user, pw):
-    return simplepam.authenticate(user, pw, service="passwd")
+    return simplepam.authenticate(user, pw)
 
 
 def main_user(uid):
