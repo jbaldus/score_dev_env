@@ -10,24 +10,11 @@ The easiest way to get this tool into your VM is to run the commands:
 git clone https://github.com/jbaldus/score_dev_env ~/score
 ```
 
-## Prepare the tool
-then move to the `~/score` directory with
-
-```sh
-cd ~/score
-```
-
-and install the Python dependencies with
-
-```sh
-python3 -m pip install -r requirements.txt
-```
-
 ## Get your score
 Anytime you want to get your score with a breakdown of the tasks you have done and which you still need to do, you can accomplish this by running:
 
 ```sh
-sudo python3 ~/score/score.py
+sudo ~/score/score.sh
 ```
 
 and you should be met with a screen that looks like this:
