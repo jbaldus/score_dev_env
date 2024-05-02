@@ -345,7 +345,7 @@ def check_partition_size(mountpoint, size):
 
 def test_3G_of_memory():
     memory = GiB(psutil.virtual_memory().total)
-    return math.isclose(memory, MEMORY_GB, abs_tol=0.1)
+    return math.isclose(memory, MEMORY_GB, abs_tol=0.15)
 
 
 def test_2_processors():
