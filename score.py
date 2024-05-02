@@ -248,7 +248,7 @@ def is_software_uptodate():
         return result.strip() != ""
     elif is_program_installed("pacman"):
         result = run("pacman -Qu")
-        return result.strip() != ""
+        return result.strip() == ""
     elif is_program_installed("yum"):
         result = run("yum check-update")
         return len(result.split("\n")) == 1
