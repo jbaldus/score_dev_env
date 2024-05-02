@@ -283,10 +283,11 @@ def is_ufw_enabled():
 
 def is_cron_job_set(command, frequency = "daily"):
     crondir = Path(f"/etc/cron.{frequency}")
-    cronlinks = [f for f in crondir.iterdir() if f.is_file() and f.is_symlink() ]
-    for link in cronlinks:
-        if os.readlink(link) == shutil.which(command):
-            return True
+    if crondir.exists():
+        cronlinks = [f for f in crondir.iterdir() if f.is_file() and f.is_symlink() ]
+        for link in cronlinks:
+            if os.readlink(link) == shutil.which(command):
+                return True
     return cron_job_search_text(command, frequency)
 
 
