@@ -110,6 +110,17 @@ def get_user_sudo_perms(user):
     return commands
 
 
+def check_sudo_commands(user:str, deb_commands: set, rh_commands: set, arch_commands: set) -> bool:
+    if is_program_installed("apt"):
+        commands = deb_commands
+    elif is_program_installed("dnf"):
+        commands = rh_commands
+    elif is_program_installed("pacman"):
+        commands = arch_commands
+    configured_commands = get_user_sudo_perms(user)
+    return configured_commands == commands
+
+
 def is_user_home_existing(user):
     try:
         user_password = pwd.getpwnam(user)
@@ -478,7 +489,7 @@ def TestUserSetup():
         Task("Admin password", check_password, [main_user(1000), "slotHMammoth7!"], failmsg="Admin password should be 'slotHMammoth7!'"),
         Task("Newguy User Exists", is_user, "newguy", failmsg="User 'newguy' doesn't exist"),
         Task("Newguy password", check_password, ["newguy", "guynew#5%"], failmsg="Newguy's password should be 'guynew#5%'"),
-        Task("Newguy's sudo commands", get_user_sudo_perms, "newguy", SUDO_COMMANDS, failmsg="Newguy's sudo commands incorrect"),
+        Task("Newguy's sudo commands", check_sudo_commands, ["newguy", DEB_SUDO_COMMANDS, RH_SUDO_COMMANDS, ARCH_SUDO_COMMANDS], failmsg="Newguy's sudo commands incorrect"),
     ])
 
 
@@ -488,7 +499,7 @@ def TestSoftwareInstallations():
         Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
     ]
     
-    programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'nodejs', 'Visual Studio Code': 'code', 'Google Chrome': 'google-chrome'}
+    programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'node', 'Visual Studio Code': 'code', 'Google Chrome': 'google-chrome'}
     for prog, command in programs_to_install.items():
         tasks.append(
             Task(f"Program {prog} installed", is_program_installed, command, failmsg=f"Program {prog} should be installed")
@@ -542,7 +553,9 @@ PROCESSORS = 2
 HOME_SIZE_GB = 5
 ROOT_SIZE_GB = 20
 PG_PASSWD_HASH = 'md51efb824c86d1810d4dc8cec3d54148a2'
-SUDO_COMMANDS = set(map(resolve_command,['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql']))
+DEB_SUDO_COMMANDS = set(map(resolve_command,['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql']))
+ARCH_SUDO_COMMANDS = set(map(resolve_command, ['/usr/bin/pacman -Sy', '/usr/bin/pacman -Syu', '/usr/bin/systemctl restart postgresql']))
+RH_SUDO_COMMANDS = set(map(resolve_command, ['/usr/bin/dnf update', '/usr/bin/dnf upgrade', '/usr/bin/systemctl restart postgresql']))
 NODE_VERSION = 14
 
 
