@@ -250,7 +250,7 @@ def is_software_uptodate():
         result = run("pacman -Qu")
         return result.strip() == ""
     elif is_program_installed("yum"):
-        result = run("yum check-update")
+        result = run("yum check-update | grep updates")
         return len(result.split("\n")) == 1
     else:
         raise NotImplementedError("Scoring can only run on systems with apt or pacman")
