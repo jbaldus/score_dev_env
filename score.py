@@ -1,4 +1,13 @@
-#!/usr/bin/python3
+#!/usr/bin/env uv run
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "psutil",
+#     "rich",
+#     "scramp",
+#     "simplepam",
+# ]
+# ///
 
 import base64
 import hashlib
