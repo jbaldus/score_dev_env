@@ -221,6 +221,8 @@ def old_pg_user_password(user, password):
 
 
 def is_program_installed(program):
+    if type(program) == list:
+        return any(map(shutil.which, program))
     return shutil.which(program) is not None
 
 def resolve_command(command):
@@ -509,7 +511,7 @@ def TestSoftwareInstallations():
         Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
     ]
     
-    programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'node', 'Visual Studio Code': 'code', 'Google Chrome': 'google-chrome'}
+    programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'node', 'Visual Studio Code': 'code', 'Google Chrome': ['google-chrome', 'google-chrome-stable']}
     for prog, command in programs_to_install.items():
         tasks.append(
             Task(f"Program {prog} installed", is_program_installed, command, failmsg=f"Program {prog} should be installed")
