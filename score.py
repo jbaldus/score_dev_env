@@ -220,10 +220,8 @@ def old_pg_user_password(user, password):
     return pwhash == "md5" + calculated_hash
 
 
-def is_program_installed(program):
-    if type(program) == list:
-        return any(map(shutil.which, program))
-    return shutil.which(program) is not None
+def is_program_installed(*program):
+    return any(map(shutil.which, program))
 
 def resolve_command(command):
     split_command = shlex.split(command)
