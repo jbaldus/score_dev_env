@@ -223,6 +223,7 @@ def old_pg_user_password(user, password):
 def is_program_installed(*program):
     return any(map(shutil.which, program))
 
+
 def resolve_command(command):
     split_command = shlex.split(command)
     cmd = split_command[0]
@@ -231,10 +232,6 @@ def resolve_command(command):
         return None
     args = " ".join(split_command[1:])
     return f"{resolved_cmd} {args}"
-
-
-def is_one_of_program_installed(*programs):
-    return any(map(is_program_installed, programs))
 
 
 def is_program_uptodate(program):
@@ -305,10 +302,10 @@ def cron_job_search_text(search_text, frequency = "daily"):
     executable = os.access(grep, os.X_OK)
     if grep != "" and executable:
         return True
-    grep = run(f"grep {search_text} /etc/crontab")
+    grep = run(f"grep '{search_text}' /etc/crontab")
     if grep != "":
         return True
-    grep = run(f"grep -R {search_text} /var/spool/cron/*")
+    grep = run(f"grep -R '{search_text}' /var/spool/cron")
     return grep != ""
 
 
@@ -506,7 +503,7 @@ def TestUserSetup():
 def TestSoftwareInstallations():
     tasks = [
         Task("Software is updated", is_software_uptodate,  failmsg="Software is not all upgraded"),
-        Task("Yakuake or Guake installed", is_one_of_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
+        Task("Yakuake or Guake installed", is_program_installed, ['yakuake', 'guake'], failmsg=f"Yakuake or Guake should be installed, depending on your desktop"),
     ]
     
     programs_to_install = {'Git': 'git', 'Vim': 'vim', 'BPython': 'bpython', 'Node.js': 'node', 'Visual Studio Code': 'code', 'Google Chrome': ['google-chrome', 'google-chrome-stable']}
