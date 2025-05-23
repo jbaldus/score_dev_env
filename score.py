@@ -64,6 +64,7 @@ except ImportError:
     def bold(text):
         return text
 
+alerts = []
 
 def run(command, is_shell=False):
     """Runs a shell command and returns the stdout response"""
@@ -120,7 +121,7 @@ def get_user_sudo_perms(user):
 
 
 def check_sudo_commands(user:str, deb_commands: set, rh_commands: set, arch_commands: set) -> bool:
-
+    global alerts
     if is_program_installed("apt"):
         commands = deb_commands
     elif is_program_installed("dnf"):
@@ -131,13 +132,13 @@ def check_sudo_commands(user:str, deb_commands: set, rh_commands: set, arch_comm
     if configured_commands == deb_commands and commands != deb_commands:
         text = f"You have correctly configured newguy's sudo commands, but they should be changed to reflect this distribution. \nPlease update them to be these commands:\n\n{'\n'.join(commands)}"
         if use_rich:
-            title = Text(Alert, justify='center')
-            text = f"You have correctly configured newguy's sudo commands, but they should be changed to reflect this distribution. \nPlease update them to be these commands:\n\n{'\n'.join(commands)}"
+            title = Text("Alert", justify='center')
+            text = f"You have correctly configured newguy's sudo commands for a Debian-based system, but they should be changed to reflect this distribution. \n\nPlease update them to be these commands:\n\n\t{'\n\t'.join(commands)}"
             panel_text = Group(title, text, '', 'then run the score again')
-            panel = Panel(panel_text, highlight=True, border_style="yellow", width=90, style="bold black on yellow")
-            print(panel) 
+            panel = Panel(panel_text, highlight=True, border_style="yellow", width=100, style="bold yellow")
+            alerts.append(panel)
         else:
-            print(text)
+            alerts.append(text)
     return configured_commands == commands
 
 
@@ -571,9 +572,9 @@ PROCESSORS = 2
 HOME_SIZE_GB = 5
 ROOT_SIZE_GB = 20
 PG_PASSWD_HASH = 'md51efb824c86d1810d4dc8cec3d54148a2'
-DEB_SUDO_COMMANDS = set(map(resolve_command,['/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql']))
-ARCH_SUDO_COMMANDS = set(map(resolve_command, ['/usr/bin/pacman -Sy', '/usr/bin/pacman -Syu', '/usr/bin/systemctl restart postgresql']))
-RH_SUDO_COMMANDS = set(map(resolve_command, ['/usr/bin/dnf update', '/usr/bin/dnf upgrade', '/usr/bin/systemctl restart postgresql']))
+DEB_SUDO_COMMANDS = {'/usr/bin/apt update', '/usr/bin/apt upgrade', '/usr/bin/systemctl restart postgresql'}
+ARCH_SUDO_COMMANDS = {'/usr/bin/pacman -Sy', '/usr/bin/pacman -Syu', '/usr/bin/systemctl restart postgresql'}
+RH_SUDO_COMMANDS = {'/usr/bin/dnf update', '/usr/bin/dnf upgrade', '/usr/bin/systemctl restart postgresql'}
 NODE_VERSION = 14
 
 
@@ -598,3 +599,5 @@ if __name__ == "__main__":
 
     for test in tests:
         test.report()
+    for alert in alerts:
+        print(alerts)
