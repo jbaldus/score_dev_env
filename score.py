@@ -129,7 +129,7 @@ def check_sudo_commands(user:str, deb_commands: set, rh_commands: set, arch_comm
     elif is_program_installed("pacman"):
         commands = arch_commands
     configured_commands = get_user_sudo_perms(user)
-    if configured_commands == deb_commands and commands != deb_commands:
+    if True or (configured_commands == deb_commands and commands != deb_commands):
         nl = "\n"
         nltab = "\n\t"
         text = f"You have correctly configured newguy's sudo commands, but they should be changed to reflect this distribution. \nPlease update them to be these commands:\n\n{nl.join(commands)}"
