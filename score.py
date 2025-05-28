@@ -129,18 +129,18 @@ def check_sudo_commands(user:str, deb_commands: set, rh_commands: set, arch_comm
     elif is_program_installed("pacman"):
         commands = arch_commands
     configured_commands = get_user_sudo_perms(user)
-    # if configured_commands == deb_commands and commands != deb_commands:
-    nl = "\n"
-    nltab = "\n\t"
-    text = f"You have correctly configured newguy's sudo commands, but they should be changed to reflect this distribution. \nPlease update them to be these commands:\n\n{nl.join(commands)}"
-    if use_rich:
-        title = Text("Alert", justify='center')
-        text = f"You have correctly configured newguy's sudo commands for a Debian-based system, but they should be changed to reflect this distribution. \n\nPlease update them to be these commands:\n\n\t{nltab.join(commands)}"
-        panel_text = Group(title, text, '', 'then run the score again')
-        panel = Panel(panel_text, highlight=True, border_style="yellow", width=100, style="bold yellow")
-        alerts.append(panel)
-    else:
-        alerts.append(text)
+    if configured_commands == deb_commands and commands != deb_commands:
+        nl = "\n"
+        nltab = "\n\t"
+        text = f"You have correctly configured newguy's sudo commands, but they should be changed to reflect this distribution. \nPlease update them to be these commands:\n\n{nl.join(commands)}"
+        if use_rich:
+            title = Text("Alert", justify='center')
+            text = f"You have correctly configured newguy's sudo commands for a Debian-based system, but they should be changed to reflect this distribution. \n\nPlease update them to be these commands:\n\n\t{nltab.join(commands)}"
+            panel_text = Group(title, text, '', 'then run the score again')
+            panel = Panel(panel_text, highlight=True, border_style="yellow", width=100, style="bold yellow")
+            alerts.append(panel)
+        else:
+            alerts.append(text)
     return configured_commands == commands
 
 
